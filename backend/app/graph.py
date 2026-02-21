@@ -1,15 +1,52 @@
 from langgraph.graph import StateGraph
 from app.state import PipelineState
+
 from app.agents.signal_discovery import discover_signals
 from app.agents.signal_scoring import score_signal
 from app.agents.signal_validator import validate_signal
 from app.agents.serp_gap import serp_gap_analysis
 from app.agents.strategy_brief import generate_strategy_brief
+from app.agents.blog_generator import generate_blog
+from app.agents.blog_critique import critique_blog
+
+
+def blog_pipeline(state: PipelineState):
+    evolution = []
+
+    blog = generate_blog(state["strategy_brief"])
+
+    for i in range(2):
+        critique = critique_blog(blog)
+        scores = critique["scores"]
+
+        evolution.append({
+            "draft_number": i + 1,
+            "scores": scores,
+            "key_changes_made": critique.get("rewrite_instructions", [])
+        })
+
+        # Quality gate
+        if all(v >= 7 for v in scores.values()):
+            break
+
+        # Targeted rewrite (simple but effective for Week 3)
+        blog = (
+            blog
+            + "\n\n# Revision Notes\n"
+            + "\n".join(critique["rewrite_instructions"])
+        )
+
+    state["blog_final"] = blog
+    state["blog_evolution"] = evolution
+    return state
 
 
 def build_graph():
     graph = StateGraph(PipelineState)
 
+    # ----------------------
+    # Layer 2 – Signals
+    # ----------------------
     def discover(state):
         state["raw_signals"] = discover_signals(state["keyword"])
         return state
@@ -31,6 +68,9 @@ def build_graph():
         state["identified_gaps"] = gaps
         return state
 
+    # ----------------------
+    # Layer 3 – Strategy
+    # ----------------------
     def strategy(state):
         state["strategy_brief"] = generate_strategy_brief(
             keyword=state["keyword"],
@@ -39,16 +79,24 @@ def build_graph():
         )
         return state
 
+    # ----------------------
+    # Register Nodes
+    # ----------------------
     graph.add_node("discover", discover)
     graph.add_node("score", score)
     graph.add_node("validate", validate)
     graph.add_node("serp", serp)
     graph.add_node("strategy", strategy)
+    graph.add_node("blog", blog_pipeline)
 
+    # ----------------------
+    # Graph Flow
+    # ----------------------
     graph.set_entry_point("discover")
     graph.add_edge("discover", "score")
     graph.add_edge("score", "validate")
     graph.add_edge("validate", "serp")
     graph.add_edge("serp", "strategy")
+    graph.add_edge("strategy", "blog")
 
     return graph.compile()
