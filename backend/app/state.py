@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import List
 from app.models.signal import Signal, ScoredSignal
+from app.models.strategy import StrategyBrief
+
 
 class PipelineState(dict):
     keyword: str
@@ -9,3 +11,4 @@ class PipelineState(dict):
     validated_facts: List[str]
     competitor_angles: List[str]
     identified_gaps: List[str]
+    strategy_brief: StrategyBrief
