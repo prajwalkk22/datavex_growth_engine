@@ -1,6 +1,9 @@
+from sympy import li
+from asyncio import graph
 from langgraph.graph import StateGraph
 from app.state import PipelineState
-
+from app.agents.short_form_generator import generate_linkedin, generate_twitter
+from app.agents.short_form_critique import critique
 from app.agents.signal_discovery import discover_signals
 from app.agents.signal_scoring import score_signal
 from app.agents.signal_validator import validate_signal
@@ -78,7 +81,26 @@ def build_graph():
             identified_gaps=state["identified_gaps"],
         )
         return state
+    def short_form_pipeline(state):
+    # LinkedIn
+        li = generate_linkedin(state["strategy_brief"])
+        li_review = critique(li)
 
+        state["linkedin"] = {
+        "final_draft": li,
+        "scores": li_review["scores"]
+        }
+
+    # Twitter
+        tw = generate_twitter(state["strategy_brief"])
+        tw_review = critique("\n".join(tw))
+
+        state["twitter"] = {
+        "tweets": tw,
+        "scores": tw_review["scores"]
+        }
+
+        return state
     # ----------------------
     # Register Nodes
     # ----------------------
@@ -98,5 +120,7 @@ def build_graph():
     graph.add_edge("validate", "serp")
     graph.add_edge("serp", "strategy")
     graph.add_edge("strategy", "blog")
-
+    graph.add_node("short_form", short_form_pipeline)
+    graph.add_edge("blog", "short_form")
+    
     return graph.compile()
