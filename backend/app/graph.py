@@ -1,6 +1,6 @@
 from langgraph.graph import StateGraph
 from backend.app.state import PipelineState
-
+from backend.app.approval import approval_and_publish
 # Signal + Strategy
 from backend.app.agents.signal_discovery import discover_signals
 from backend.app.agents.signal_scoring import score_signal
@@ -48,10 +48,11 @@ def blog_pipeline(state: PipelineState):
             + "\n".join(review["rewrite_instructions"])
         )
 
+    # ✅ Final canonical artifact
     state["blog_final"] = blog
     state["blog_evolution"] = evolution
 
-    # 🔒 AUTHORITY REVIEW (HARD GATE)
+    # 🔒 AUTHORITY REVIEW (AI HARD GATE)
     decision = authority_review(blog)
 
     if not decision["approved"]:
@@ -61,9 +62,11 @@ def blog_pipeline(state: PipelineState):
         return state
 
     state["authority_approved"] = True
+
+    # 🔴 HUMAN-IN-THE-LOOP DISTRIBUTION
+    approval_and_publish(state["blog_final"])
+
     return state
-
-
 # ======================================================
 # SHORT FORM + SOCIAL ASSETS (POST-APPROVAL ONLY)
 # ======================================================
