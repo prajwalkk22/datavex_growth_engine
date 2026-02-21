@@ -1,55 +1,107 @@
-from sympy import li
-from asyncio import graph
 from langgraph.graph import StateGraph
 from app.state import PipelineState
-from app.agents.short_form_generator import generate_linkedin, generate_twitter
-from app.agents.short_form_critique import critique
+
+# Signal + Strategy
 from app.agents.signal_discovery import discover_signals
 from app.agents.signal_scoring import score_signal
 from app.agents.signal_validator import validate_signal
 from app.agents.serp_gap import serp_gap_analysis
 from app.agents.strategy_brief import generate_strategy_brief
+
+# Blog
 from app.agents.blog_generator import generate_blog
 from app.agents.blog_critique import critique_blog
 
+# Verification
+from app.agents.pain_solution_matcher import match_pain_to_solution
+from app.agents.authority_review import authority_review
 
+# Short form
+from app.agents.short_form_generator import generate_linkedin, generate_twitter
+from app.agents.short_form_critique import critique
+from app.agents.social_publisher import publish_social_assets
+
+
+# ======================================================
+# BLOG PIPELINE (with authority gate)
+# ======================================================
 def blog_pipeline(state: PipelineState):
     evolution = []
 
     blog = generate_blog(state["strategy_brief"])
 
     for i in range(2):
-        critique = critique_blog(blog)
-        scores = critique["scores"]
+        review = critique_blog(blog)
+        scores = review["scores"]
 
         evolution.append({
             "draft_number": i + 1,
             "scores": scores,
-            "key_changes_made": critique.get("rewrite_instructions", [])
+            "key_changes_made": review.get("rewrite_instructions", [])
         })
 
-        # Quality gate
         if all(v >= 7 for v in scores.values()):
             break
 
-        # Targeted rewrite (simple but effective for Week 3)
-        blog = (
-            blog
-            + "\n\n# Revision Notes\n"
-            + "\n".join(critique["rewrite_instructions"])
+        blog += (
+            "\n\n# Revision Notes\n"
+            + "\n".join(review["rewrite_instructions"])
         )
 
     state["blog_final"] = blog
     state["blog_evolution"] = evolution
+
+    # 🔒 AUTHORITY REVIEW (HARD GATE)
+    decision = authority_review(blog)
+
+    if not decision["approved"]:
+        state["halt"] = True
+        state["halt_reason"] = "Authority rejected blog"
+        state["authority_approved"] = False
+        return state
+
+    state["authority_approved"] = True
     return state
 
 
+# ======================================================
+# SHORT FORM + SOCIAL ASSETS (POST-APPROVAL ONLY)
+# ======================================================
+def short_form_pipeline(state: PipelineState):
+    # LinkedIn
+    li = generate_linkedin(state["strategy_brief"])
+    li_review = critique(li)
+
+    state["linkedin"] = {
+        "final_draft": li,
+        "scores": li_review["scores"]
+    }
+
+    # Twitter
+    tw = generate_twitter(state["strategy_brief"])
+    tw_review = critique("\n".join(tw))
+
+    state["twitter"] = {
+        "tweets": tw,
+        "scores": tw_review["scores"]
+    }
+
+    # Final publish-ready assets
+    state["social_assets"] = publish_social_assets(
+        blog=state["blog_final"],
+        strategy=state["strategy_brief"]
+    )
+
+    return state
+
+
+# ======================================================
+# GRAPH BUILDER
+# ======================================================
 def build_graph():
     graph = StateGraph(PipelineState)
 
-    # ----------------------
-    # Layer 2 – Signals
-    # ----------------------
+    # -------- Layer 2: Signals --------
     def discover(state):
         state["raw_signals"] = discover_signals(state["keyword"])
         return state
@@ -71,9 +123,19 @@ def build_graph():
         state["identified_gaps"] = gaps
         return state
 
-    # ----------------------
-    # Layer 3 – Strategy
-    # ----------------------
+    # -------- NEW: Pain → Solution Gate --------
+    def verify_solution(state):
+        matches = match_pain_to_solution(state["identified_gaps"])
+
+        if not matches:
+            state["halt"] = True
+            state["halt_reason"] = "No verified DataVex solution for this pain"
+            return state
+
+        state["verified_solutions"] = matches
+        return state
+
+    # -------- Strategy --------
     def strategy(state):
         state["strategy_brief"] = generate_strategy_brief(
             keyword=state["keyword"],
@@ -81,46 +143,25 @@ def build_graph():
             identified_gaps=state["identified_gaps"],
         )
         return state
-    def short_form_pipeline(state):
-    # LinkedIn
-        li = generate_linkedin(state["strategy_brief"])
-        li_review = critique(li)
 
-        state["linkedin"] = {
-        "final_draft": li,
-        "scores": li_review["scores"]
-        }
-
-    # Twitter
-        tw = generate_twitter(state["strategy_brief"])
-        tw_review = critique("\n".join(tw))
-
-        state["twitter"] = {
-        "tweets": tw,
-        "scores": tw_review["scores"]
-        }
-
-        return state
-    # ----------------------
-    # Register Nodes
-    # ----------------------
+    # -------- Register Nodes --------
     graph.add_node("discover", discover)
     graph.add_node("score", score)
     graph.add_node("validate", validate)
     graph.add_node("serp", serp)
+    graph.add_node("verify_solution", verify_solution)
     graph.add_node("strategy", strategy)
     graph.add_node("blog", blog_pipeline)
+    graph.add_node("short_form", short_form_pipeline)
 
-    # ----------------------
-    # Graph Flow
-    # ----------------------
+    # -------- Graph Flow --------
     graph.set_entry_point("discover")
     graph.add_edge("discover", "score")
     graph.add_edge("score", "validate")
     graph.add_edge("validate", "serp")
-    graph.add_edge("serp", "strategy")
+    graph.add_edge("serp", "verify_solution")
+    graph.add_edge("verify_solution", "strategy")
     graph.add_edge("strategy", "blog")
-    graph.add_node("short_form", short_form_pipeline)
     graph.add_edge("blog", "short_form")
-    
+
     return graph.compile()
