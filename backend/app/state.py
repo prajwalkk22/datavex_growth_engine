@@ -1,7 +1,7 @@
 from typing import List
-from app.models.signal import Signal, ScoredSignal
-from app.models.strategy import StrategyBrief
-from app.models.blog import BlogDraft, BlogEvolution
+from backend.app.models.signal import Signal, ScoredSignal
+from backend.app.models.strategy import StrategyBrief
+from backend.app.models.blog import BlogDraft, BlogEvolution
 
 class PipelineState(dict):
     keyword: str

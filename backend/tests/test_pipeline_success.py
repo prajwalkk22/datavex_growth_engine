@@ -1,4 +1,4 @@
-from app.graph import build_graph
+from backend.app.graph import build_graph
 from unittest.mock import patch
 
 def test_pipeline_full_success():

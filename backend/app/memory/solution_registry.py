@@ -1,4 +1,4 @@
-from app.memory.datavex_loader import load_datavex_memory
+from backend.app.memory.datavex_loader import load_datavex_memory
 
 def build_solution_registry():
     raw_memory = load_datavex_memory()

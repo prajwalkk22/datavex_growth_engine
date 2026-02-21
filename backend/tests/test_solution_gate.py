@@ -1,5 +1,5 @@
-from app.state import PipelineState
-from app.agents.pain_solution_matcher import match_pain_to_solution
+from backend.app.state import PipelineState
+from backend.app.agents.pain_solution_matcher import match_pain_to_solution
 
 def test_pipeline_halts_without_solution():
     state = PipelineState(

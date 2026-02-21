@@ -1,7 +1,7 @@
 import os
 import json
 from google import genai
-from app.models.strategy import StrategyBrief
+from backend.app.models.strategy import StrategyBrief
 
 # Official Gemini client (FREE tier works)
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))

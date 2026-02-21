@@ -1,5 +1,5 @@
 import requests
-from app.config import TAVILY_API_KEY
+from backend.app.config import TAVILY_API_KEY
 
 def serp_gap_analysis(keyword: str):
     response = requests.post(

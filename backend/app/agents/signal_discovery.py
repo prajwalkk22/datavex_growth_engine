@@ -1,6 +1,6 @@
 import requests
-from app.config import TAVILY_API_KEY
-from app.models.signal import Signal
+from backend.app.config import TAVILY_API_KEY
+from backend.app.models.signal import Signal
 
 def discover_signals(keyword: str) -> list[Signal]:
     response = requests.post(

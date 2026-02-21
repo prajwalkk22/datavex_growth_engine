@@ -1,4 +1,4 @@
-from app.models.signal import Signal, ScoredSignal
+from backend.app.models.signal import Signal, ScoredSignal
 from datetime import datetime
 
 def score_signal(signal: Signal) -> ScoredSignal:

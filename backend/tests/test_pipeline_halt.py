@@ -1,4 +1,4 @@
-from app.graph import build_graph
+from backend.app.graph import build_graph
 
 def test_pipeline_halts_without_solution():
     graph = build_graph()

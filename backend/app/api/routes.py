@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.graph import build_graph
-from app.agents.pain_solution_matcher import match_pain_to_solution
+from backend.app.graph import build_graph
+from backend.app.agents.pain_solution_matcher import match_pain_to_solution
 
 router = APIRouter()
 

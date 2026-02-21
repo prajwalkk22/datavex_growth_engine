@@ -1,25 +1,25 @@
 from langgraph.graph import StateGraph
-from app.state import PipelineState
+from backend.app.state import PipelineState
 
 # Signal + Strategy
-from app.agents.signal_discovery import discover_signals
-from app.agents.signal_scoring import score_signal
-from app.agents.signal_validator import validate_signal
-from app.agents.serp_gap import serp_gap_analysis
-from app.agents.strategy_brief import generate_strategy_brief
+from backend.app.agents.signal_discovery import discover_signals
+from backend.app.agents.signal_scoring import score_signal
+from backend.app.agents.signal_validator import validate_signal
+from backend.app.agents.serp_gap import serp_gap_analysis
+from backend.app.agents.strategy_brief import generate_strategy_brief
 
 # Blog
-from app.agents.blog_generator import generate_blog
-from app.agents.blog_critique import critique_blog
+from backend.app.agents.blog_generator import generate_blog
+from backend.app.agents.blog_critique import critique_blog
 
 # Verification
-from app.agents.pain_solution_matcher import match_pain_to_solution
-from app.agents.authority_review import authority_review
+from backend.app.agents.pain_solution_matcher import match_pain_to_solution
+from backend.app.agents.authority_review import authority_review
 
 # Short form
-from app.agents.short_form_generator import generate_linkedin, generate_twitter
-from app.agents.short_form_critique import critique
-from app.agents.social_publisher import publish_social_assets
+from backend.app.agents.short_form_generator import generate_linkedin, generate_twitter
+from backend.app.agents.short_form_critique import critique
+from backend.app.agents.social_publisher import publish_social_assets
 
 
 # ======================================================

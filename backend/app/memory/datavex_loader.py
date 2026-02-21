@@ -1,10 +1,17 @@
 import json
 from pathlib import Path
 
-DATA_DIR = Path("data/datavex")
+# backend/app/memory/datavex_loader.py
+# Go up to: backend/
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+# backend/data/datavex
+DATA_DIR = BASE_DIR / "data" / "datavex"
 
 def load_datavex_memory():
     solutions = []
+
+    print("📂 Using DATA_DIR:", DATA_DIR)
 
     # LinkedIn content
     linkedin_file = DATA_DIR / "segregated_posts.json"
@@ -18,6 +25,8 @@ def load_datavex_memory():
                         "tag": tag,
                         "content": text
                     })
+    else:
+        print("❌ Missing:", linkedin_file)
 
     # Website content
     website_file = DATA_DIR / "website_data.txt"
@@ -27,6 +36,8 @@ def load_datavex_memory():
                 "source": "website",
                 "content": f.read()
             })
+    else:
+        print("❌ Missing:", website_file)
 
     print(f"🧠 DataVex memory loaded: {len(solutions)} items")
     return solutions
