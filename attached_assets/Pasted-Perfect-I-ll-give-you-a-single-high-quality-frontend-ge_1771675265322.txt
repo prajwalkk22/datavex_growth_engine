@@ -1,0 +1,326 @@
+Perfect — I’ll give you a **single, high-quality frontend generation prompt** that:
+
+* **Exactly matches your existing backend**
+* Uses **industry-standard frontend architecture**
+* Clearly defines **all API endpoints**
+* Handles **authority approval, halts, and publishing flow**
+* Is robust enough to extend later (Week 5+ features)
+
+You can paste this **as-is** into any strong frontend generator (GPT-4.1, Claude, Cursor, v0, Bolt, etc.).
+
+---
+
+# ✅ FRONTEND GENERATION PROMPT (COPY–PASTE)
+
+---
+
+## 🔹 Context
+
+You are building the frontend for an **AI-driven Growth Intelligence Engine** called **DataVex Growth Engine**.
+
+The backend is already implemented using **FastAPI + LangGraph**, and the frontend must integrate with it **without modifying backend contracts**.
+
+The system:
+
+* Discovers competitor content
+* Identifies pain points competitors don’t solve
+* Generates authority-grade blogs grounded in DataVex’s real solutions
+* Requires **authority approval** before publishing
+* Generates short-form content (LinkedIn, Twitter/X)
+* Eventually posts to social platforms **only after approval**
+
+This is **not a marketing dashboard** — it is a **strategic content intelligence console**.
+
+---
+
+## 🔹 Tech Stack Requirements (Frontend)
+
+Use **industry-standard modern frontend practices**:
+
+* **Framework:** Next.js 14 (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS
+* **State Management:** React Query (TanStack Query)
+* **Forms:** React Hook Form + Zod
+* **Charts (optional):** Recharts or Tremor
+* **UI Philosophy:** Clean, analytical, internal-tool style (like Stripe / Vercel dashboards)
+
+No backend logic duplication.
+Frontend is a **pure consumer** of backend APIs.
+
+---
+
+## 🔹 Backend API Contract (MUST MATCH EXACTLY)
+
+### 1️⃣ Run the full pipeline
+
+**Endpoint**
+
+```http
+POST /run-pipeline
+```
+
+**Request**
+
+```json
+{
+  "keyword": "AI-native database"
+}
+```
+
+**Response (example – may vary slightly by run)**
+
+```json
+{
+  "keyword": "AI-native database",
+
+  "raw_signals": [
+    {
+      "title": "...",
+      "url": "...",
+      "summary": "...",
+      "relevance_score": 7.0
+    }
+  ],
+
+  "scored_signals": [
+    {
+      "title": "...",
+      "authority": 6.0,
+      "recency": 6.0,
+      "relevance": 7.0,
+      "novelty": 7.5,
+      "composite": 6.55
+    }
+  ],
+
+  "selected_signal": { ... },
+
+  "validated_facts": [
+    "Signal URL reachable",
+    "Primary source confirmed"
+  ],
+
+  "competitor_angles": [
+    "What is an AI-native database?",
+    "The rise of the AI-native database"
+  ],
+
+  "identified_gaps": [
+    "Operational impact not discussed",
+    "Missing RevOps execution layer"
+  ],
+
+  "verified_solutions": [
+    "Real-time vector search for RevOps signals",
+    "Unified semantic + transactional intelligence"
+  ],
+
+  "strategy_brief": {
+    "chosen_angle": "...",
+    "angle_rationale": "...",
+    "competitive_gap_exploited": "...",
+    "core_positioning_thesis": "...",
+    "platform_distribution_plan": {
+      "blog": "...",
+      "linkedin": "...",
+      "twitter": "..."
+    },
+    "target_audience": "...",
+    "estimated_authority_score": 92
+  },
+
+  "blog_final": "Full markdown blog content...",
+
+  "blog_evolution": [
+    {
+      "draft_number": 1,
+      "scores": {
+        "Hook Strength": 7,
+        "Clarity": 7,
+        "Authority Tone": 9
+      }
+    }
+  ],
+
+  "authority_approved": true,
+
+  "social_assets": {
+    "linkedin": "Final LinkedIn post",
+    "twitter": [
+      "Tweet 1",
+      "Tweet 2"
+    ]
+  }
+}
+```
+
+⚠️ If authority is **not approved**, backend may return:
+
+```json
+{
+  "halt": true,
+  "halt_reason": "Authority rejected blog"
+}
+```
+
+Frontend **must handle this state gracefully**.
+
+---
+
+## 🔹 Frontend Functional Requirements
+
+### 1️⃣ Keyword Input Page
+
+* Input field for `keyword`
+* Submit button → triggers `/run-pipeline`
+* Loading state with clear progress indicator
+* Disable resubmission while running
+
+---
+
+### 2️⃣ Pipeline Results Dashboard (Single Page)
+
+Organize results into **clear sections**:
+
+#### 🔹 Signal Intelligence
+
+* List raw signals
+* Highlight selected signal
+* Show scoring breakdown (authority, novelty, composite)
+
+#### 🔹 Competitor Gap Analysis
+
+* Display competitor angles
+* Highlight identified gaps (badges or callouts)
+
+#### 🔹 Strategy Brief (Authority Layer)
+
+* Chosen angle
+* Gap exploited
+* Core positioning thesis
+* Target audience
+* Authority score (visual meter)
+
+---
+
+### 3️⃣ Blog Review Panel
+
+* Render `blog_final` in **Markdown**
+* Show blog evolution history
+* Show critique scores
+* Read-only (no editing in frontend)
+
+---
+
+### 4️⃣ Authority Approval Status (CRITICAL)
+
+Frontend must clearly show:
+
+* ✅ Approved → proceed to social assets
+* ❌ Rejected → show halt reason, disable publishing actions
+
+Use **visual gating**:
+
+* Greyed-out social buttons if not approved
+* Explicit “Authority Approved” badge if approved
+
+---
+
+### 5️⃣ Social Media Assets Panel
+
+Only visible if:
+
+```ts
+authority_approved === true
+```
+
+Show:
+
+* LinkedIn post (single textarea, copy button)
+* Twitter/X thread (list with copy buttons)
+
+⚠️ Frontend **does not auto-post** — it only prepares assets
+(Future Week will add posting agent)
+
+---
+
+### 6️⃣ Error & Halt Handling
+
+* If backend returns `halt: true`
+
+  * Show halt reason clearly
+  * Stop rendering downstream sections
+* If API fails
+
+  * Show retry option
+  * Preserve keyword input
+
+---
+
+## 🔹 UX / UI Standards
+
+* Internal SaaS dashboard look
+* No marketing animations
+* Clear hierarchy
+* Dense but readable layouts
+* Neutral color palette (gray/blue)
+* Code-like precision in wording
+
+---
+
+## 🔹 Folder Structure (Frontend)
+
+```txt
+app/
+ ├─ page.tsx                 # Keyword input
+ ├─ results/
+ │   └─ page.tsx             # Results dashboard
+ ├─ components/
+ │   ├─ SignalPanel.tsx
+ │   ├─ GapAnalysis.tsx
+ │   ├─ StrategyBrief.tsx
+ │   ├─ BlogViewer.tsx
+ │   ├─ AuthorityStatus.tsx
+ │   └─ SocialAssets.tsx
+ ├─ lib/
+ │   └─ api.ts               # fetch wrapper
+ ├─ types/
+ │   └─ pipeline.ts          # Typed API response
+```
+
+---
+
+## 🔹 Non-Goals (Do NOT build)
+
+* ❌ Authentication
+* ❌ Social media OAuth
+* ❌ CMS editing
+* ❌ Backend mutations
+* ❌ Direct posting
+
+---
+
+## 🔹 Final Instruction
+
+Generate **production-ready frontend code** that:
+
+* Compiles without errors
+* Matches backend API **exactly**
+* Is extensible for future posting automation
+* Treats this as a **strategic internal intelligence tool**
+
+---
+
+# END OF PROMPT
+
+---
+
+If you want, next I can:
+
+* Validate frontend ↔ backend contract field-by-field
+* Design the **Week 5 auto-posting agent**
+* Create a **system architecture diagram**
+* Help you prep a **demo narrative** for judges/investors
+
+Just tell me 👍
