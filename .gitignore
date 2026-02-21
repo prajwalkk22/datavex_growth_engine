@@ -1,0 +1,70 @@
+# ================================
+# Python
+# ================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ================================
+# Virtual Environments
+# ================================
+.venv/
+venv/
+env/
+
+# ================================
+# Environment Variables
+# ================================
+.env
+.env.*
+!.env.example
+
+# ================================
+# FastAPI / Uvicorn
+# ================================
+*.log
+
+# ================================
+# LangGraph / LLM artifacts
+# ================================
+.checkpoints/
+.langgraph/
+.llm_cache/
+
+# ================================
+# Node / Frontend (Next.js - future)
+# ================================
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# ================================
+# OS / Editor
+# ================================
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+!.vscode/extensions.json
+
+# JetBrains
+.idea/
+
+# ================================
+# Git
+# ================================
+*.orig
+*.rej
+
+# ================================
+# Misc
+# ================================
+coverage/
+htmlcov/
