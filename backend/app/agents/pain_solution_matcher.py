@@ -9,4 +9,5 @@ def match_pain_to_solution(identified_gaps: list[str]):
             if gap.lower() in entry["pain"].lower():
                 matches.append(entry)
 
+    print(f"🔎 Matching against {len(datavex_memory)} DataVex solutions")
     return matches

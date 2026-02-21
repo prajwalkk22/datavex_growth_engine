@@ -28,4 +28,5 @@ def load_datavex_memory():
                 "content": f.read()
             })
 
+    print(f"🧠 DataVex memory loaded: {len(solutions)} items")
     return solutions
