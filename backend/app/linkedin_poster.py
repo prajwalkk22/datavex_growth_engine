@@ -8,8 +8,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 # ⚠️ USE TEST ACCOUNT ONLY
-EMAIL = "sharanabasavajkr99@gmail.com"
-PASSWORD = "sharana_@123"
+EMAIL = ""
+PASSWORD = ""
 
 def post_to_linkedin(post_text: str):
     chrome_options = Options()
